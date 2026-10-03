@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Windowsill | A plant care tracker</title>
+  <meta name="description" content="Track when each of your houseplants needs water. Filter your plants, mark them as watered, add new ones and switch to dark mode.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Loaded early (no defer) so the saved theme is applied before the page paints -->
+  <script src="js/theme.js"></script>
+  <script src="js/menu.js" defer></script>
+  <script src="js/accordion.js" defer></script>
+  <script src="js/plants.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="logo" href="#top">
+        <span class="logo__mark" aria-hidden="true"></span>
+        <span class="logo__text">Windowsill</span>
+      </a>
+
+      <div class="site-header__controls">
+        <!-- Toggle 1: dark mode (state saved in localStorage) -->
+        <button class="theme-toggle js-theme-toggle" type="button" aria-pressed="false">
+          <span class="theme-toggle__track" aria-hidden="true">
+            <span class="theme-toggle__knob"></span>
+          </span>
+          <span class="theme-toggle__label">Dark mode</span>
+        </button>
+
+        <!-- Toggle 2: hamburger menu (classList.toggle('is-open')) -->
+        <button class="menu-button js-menu-button" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+          <span class="menu-button__bar" aria-hidden="true"></span>
+          <span class="menu-button__bar" aria-hidden="true"></span>
+          <span class="menu-button__bar" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <nav class="site-nav js-site-nav" id="site-nav" aria-label="Main">
+        <ul class="site-nav__list">
+          <li><a class="site-nav__link" href="#plants">My plants</a></li>
+          <li><a class="site-nav__link" href="#add-plant">Add a plant</a></li>
+          <li><a class="site-nav__link" href="#tips">Care tips</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO + today's watering round (updated live by JavaScript) -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__text">
+        <h1 class="hero__title" id="hero-title">Know which plant needs water today.</h1>
+        <p class="hero__lead">Windowsill keeps track of when you last watered each plant and tells you who's next. Everything is saved in your browser, so it's still here tomorrow.</p>
+      </div>
+
+      <div class="round" aria-labelledby="round-title">
+        <h2 class="round__title" id="round-title">Today's watering</h2>
+        <div class="round__drops js-round-drops" aria-hidden="true"></div>
+        <p class="round__text js-round-text">Loading your plants…</p>
+        <p class="round__next js-round-next"></p>
+      </div>
+    </section>
+
+    <!-- PLANTS: filter buttons + cards built from data -->
+    <section class="section" id="plants" aria-labelledby="plants-title">
+      <div class="section__header">
+        <h2 class="section__title" id="plants-title">My plants</h2>
+        <p class="section__intro">Press "Mark as watered" after you water a plant. Pressed it by mistake? The same button undoes it.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filter plants">
+          <button class="filter js-filter is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter js-filter" type="button" data-filter="today" aria-pressed="false">Today's round</button>
+          <button class="filter js-filter" type="button" data-filter="low" aria-pressed="false">Low light</button>
+          <button class="filter js-filter" type="button" data-filter="pet" aria-pressed="false">Pet safe</button>
+        </div>
+        <p class="toolbar__count js-plant-count" tabindex="-1" aria-live="polite"></p>
+      </div>
+
+      <div class="plant-grid js-plant-grid"></div>
+
+      <p class="empty js-empty" hidden>No plants match this filter. Choose "All" to see every plant.</p>
+    </section>
+
+    <!-- ADD A PLANT: form input → new card in the DOM -->
+    <section class="section add" id="add-plant" aria-labelledby="add-title">
+      <div class="add__intro">
+        <h2 class="section__title" id="add-title">Add a plant</h2>
+        <p class="section__intro">Not sure how often to water? Most leafy houseplants are fine with every 7 days. Succulents and cacti prefer 14 or more.</p>
+      </div>
+
+      <form class="form js-add-form" novalidate>
+        <div class="form__field">
+          <label class="form__label" for="plant-name">Name</label>
+          <input class="form__input js-input-name" type="text" id="plant-name" name="name" maxlength="40" placeholder="e.g. Kitchen basil" aria-describedby="name-error">
+          <p class="form__error js-error-name" id="name-error"></p>
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="plant-type">Type of plant <span class="form__optional">(optional)</span></label>
+          <input class="form__input" type="text" id="plant-type" name="type" maxlength="40" placeholder="e.g. Basil">
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="plant-light">Light</label>
+          <select class="form__input" id="plant-light" name="light">
+            <option value="low">Low light</option>
+            <option value="medium" selected>Medium light</option>
+            <option value="bright">Bright light</option>
+          </select>
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="plant-every">Water every (days)</label>
+          <input class="form__input js-input-every" type="number" id="plant-every" name="every" min="1" max="60" value="7" aria-describedby="every-error">
+          <p class="form__error js-error-every" id="every-error"></p>
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="plant-since">Days since last watered</label>
+          <input class="form__input js-input-since" type="number" id="plant-since" name="since" min="0" max="60" value="0" aria-describedby="since-error">
+          <p class="form__error js-error-since" id="since-error"></p>
+        </div>
+
+        <div class="form__field form__field--check">
+          <input class="form__check" type="checkbox" id="plant-pet" name="pet">
+          <label class="form__label" for="plant-pet">Safe for cats and dogs</label>
+        </div>
+
+        <button class="button button--primary form__submit" type="submit">Add plant</button>
+      </form>
+    </section>
+
+    <!-- CARE TIPS: accordion toggles -->
+    <section class="section tips" id="tips" aria-labelledby="tips-title">
+      <h2 class="section__title" id="tips-title">Care tips</h2>
+      <div class="accordion">
+        <div class="accordion__item">
+          <h3 class="accordion__heading">
+            <button class="accordion__trigger js-accordion-trigger" type="button" aria-expanded="false" aria-controls="tip-1">How do I know if a plant needs water?</button>
+          </h3>
+          <div class="accordion__panel" id="tip-1" hidden>
+            <p>Push a finger about two centimetres into the soil. If it feels dry, water. If it's still damp, wait a day or two. The schedule here is a reminder to check, not a rule.</p>
+          </div>
+        </div>
+        <div class="accordion__item">
+          <h3 class="accordion__heading">
+            <button class="accordion__trigger js-accordion-trigger" type="button" aria-expanded="false" aria-controls="tip-2">How much water should I give?</button>
+          </h3>
+          <div class="accordion__panel" id="tip-2" hidden>
+            <p>Water slowly until it runs out of the drainage hole, then empty the saucer after 15 minutes. Plants sitting in water are more likely to get root rot.</p>
+          </div>
+        </div>
+        <div class="accordion__item">
+          <h3 class="accordion__heading">
+            <button class="accordion__trigger js-accordion-trigger" type="button" aria-expanded="false" aria-controls="tip-3">What does "low light" mean?</button>
+          </h3>
+          <div class="accordion__panel" id="tip-3" hidden>
+            <p>A spot a few metres from a window, or near a north-facing one. Low-light plants survive there, but most still grow faster with more light.</p>
+          </div>
+        </div>
+        <div class="accordion__item">
+          <h3 class="accordion__heading">
+            <button class="accordion__trigger js-accordion-trigger" type="button" aria-expanded="false" aria-controls="tip-4">Should I water less in winter?</button>
+          </h3>
+          <div class="accordion__panel" id="tip-4" hidden>
+            <p>Usually yes. Plants grow slower when days are short, so the soil dries out more slowly. Try adding two or three days to each plant's schedule.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <p>Windowsill saves your plants in this browser only. Nothing is sent anywhere.</p>
+      <button class="button button--ghost js-reset" type="button">Restore sample plants</button>
+      <p class="site-footer__legal">&copy; 2026 Windowsill. Built as DecodeLabs Frontend Project 3.</p>
+    </div>
+  </footer>
+
+  <!-- Screen-reader announcements for actions (e.g. "Monstera marked as watered") -->
+  <p class="visually-hidden js-announcer" aria-live="polite"></p>
+</body>
+</html>

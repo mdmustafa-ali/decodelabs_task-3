@@ -1,0 +1,884 @@
+/* ==========================================================================
+   Windowsill — styles.css
+   - Mobile-first; larger layouts at 48em (768px) and 64em (1024px)
+   - BEM class names for styling
+   - "is-" classes = visual state set by JavaScript (is-open, is-active, ...)
+   - "js-" classes are never styled here; they are JavaScript hooks only
+   ========================================================================== */
+
+/* ---------- 1. Theme tokens ---------- */
+:root {
+  --color-bg: #eef2ea;
+  --color-surface: #ffffff;
+  --color-surface-alt: #e3eadf;
+  --color-ink: #18221b;
+  --color-muted: #4d5b52;
+  --color-line: #cfd9cc;
+  --color-leaf: #2e6b45;          /* primary; white text ≈6.6:1 */
+  --color-leaf-strong: #235536;
+  --color-on-leaf: #ffffff;
+  --color-water: #2f6fa3;         /* water accents; ≈5.3:1 on white */
+  --color-water-soft: #d7e6f3;
+  --color-due: #8a5a00;           /* "water today" text */
+  --color-overdue: #a63d2a;       /* overdue text */
+  --color-sun: #e8b931;           /* decorative only */
+  --shadow: 0 1px 2px rgba(24, 34, 27, 0.06);
+
+  --font-main: "Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-h3: clamp(1.2rem, 1.1rem + 0.4vw, 1.4rem);
+  --text-h2: clamp(1.7rem, 1.4rem + 1.4vw, 2.5rem);
+  --text-h1: clamp(2.3rem, 1.6rem + 3.6vw, 4.4rem);
+
+  --space-xs: 0.5rem;
+  --space-s: 1rem;
+  --space-m: clamp(1.25rem, 1rem + 1vw, 2rem);
+  --space-l: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  --space-xl: clamp(3rem, 2rem + 4vw, 5.5rem);
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+
+  --page-width: 74rem;
+  --touch: 2.75rem;
+  --radius: 0.75rem;
+  --radius-small: 0.4rem;
+
+  color-scheme: light;
+}
+
+/* Dark mode: JavaScript toggles .is-dark-mode on <html> */
+:root.is-dark-mode {
+  --color-bg: #121814;
+  --color-surface: #1b241e;
+  --color-surface-alt: #243029;
+  --color-ink: #e6ede7;
+  --color-muted: #a7b5ac;
+  --color-line: #33423a;
+  --color-leaf: #7cc596;
+  --color-leaf-strong: #95d3aa;
+  --color-on-leaf: #0e1a12;
+  --color-water: #86b9e3;
+  --color-water-soft: #1f3344;
+  --color-due: #e3b45a;
+  --color-overdue: #f0907c;
+  --shadow: none;
+
+  color-scheme: dark;
+}
+
+/* ---------- 2. Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-main);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.1;
+}
+
+a {
+  color: var(--color-leaf);
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-water);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-s);
+  top: -5rem;
+  z-index: 100;
+  min-height: var(--touch);
+  padding: 0.6rem var(--space-s);
+  background: var(--color-leaf);
+  color: var(--color-on-leaf);
+}
+
+.skip-link:focus {
+  top: var(--space-s);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- 3. Buttons ---------- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch);
+  padding: 0.5rem 1.1rem;
+  border: 2px solid transparent;
+  border-radius: var(--radius-small);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.button:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.button--primary {
+  background-color: var(--color-leaf);
+  color: var(--color-on-leaf);
+}
+
+.button--primary:hover {
+  background-color: var(--color-leaf-strong);
+}
+
+.button--water {
+  background-color: var(--color-water);
+  color: var(--color-surface);
+}
+
+.button--water.is-undo {
+  background-color: transparent;
+  border-color: var(--color-water);
+  color: var(--color-water);
+}
+
+.button--water:disabled {
+  background-color: var(--color-water-soft);
+  color: var(--color-ink);
+}
+
+.button--ghost {
+  background-color: transparent;
+  border-color: var(--color-line);
+  color: var(--color-ink);
+}
+
+.button--ghost:hover {
+  border-color: var(--color-muted);
+}
+
+/* ---------- 4. Header ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  max-width: var(--page-width);
+  min-height: 4rem;
+  margin: 0 auto;
+  padding: 0.5rem var(--gutter);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: var(--touch);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+/* A leaf drawn with CSS */
+.logo__mark {
+  width: 1.6rem;
+  height: 1.6rem;
+  background-color: var(--color-leaf);
+  border-radius: 0 70% 0 70%;
+}
+
+.logo__text {
+  font-size: 1.3rem;
+  font-weight: 750;
+}
+
+.site-header__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Dark mode switch */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--touch);
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.theme-toggle__track {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background-color: var(--color-line);
+  transition: background-color 0.2s ease;
+}
+
+.theme-toggle__knob {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle[aria-pressed="true"] .theme-toggle__track {
+  background-color: var(--color-leaf);
+}
+
+.theme-toggle[aria-pressed="true"] .theme-toggle__knob {
+  transform: translateX(1.25rem);
+  background-color: var(--color-on-leaf);
+}
+
+.theme-toggle__label {
+  /* Hidden visually on narrow phones (still read by screen readers) */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Hamburger → X */
+.menu-button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.menu-button__bar {
+  width: 1.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--color-ink);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.menu-button.is-open .menu-button__bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-button.is-open .menu-button__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-button.is-open .menu-button__bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile nav: hidden until the menu button adds .is-open */
+.site-nav {
+  display: none;
+  flex-basis: 100%;
+}
+
+.site-nav.is-open {
+  display: block;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 var(--space-xs);
+  list-style: none;
+}
+
+.site-nav__link {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-nav__link:hover {
+  color: var(--color-leaf);
+}
+
+/* ---------- 5. Hero + today's round ---------- */
+.hero {
+  display: grid;
+  gap: var(--space-l);
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-l) var(--gutter) var(--space-m);
+}
+
+.hero__title {
+  max-width: 14ch;
+  margin-bottom: var(--space-s);
+  font-size: var(--text-h1);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero__lead {
+  max-width: 36rem;
+  color: var(--color-muted);
+  font-size: 1.1rem;
+}
+
+.round {
+  align-self: start;
+  padding: var(--space-m);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.round__title {
+  font-size: var(--text-h3);
+  margin-bottom: var(--space-s);
+}
+
+.round__drops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  min-height: 2.2rem;
+  margin-bottom: var(--space-s);
+  padding-left: 0.3rem;
+}
+
+/* A water drop: a rotated square with three rounded corners */
+.drop {
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: 0.3rem;
+  border: 2px solid var(--color-water);
+  border-radius: 0 50% 50% 50%;
+  transform: rotate(45deg);
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+}
+
+.drop.is-filled {
+  background-color: var(--color-water);
+}
+
+.round__text {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.round__next {
+  color: var(--color-muted);
+}
+
+/* ---------- 6. Sections ---------- */
+.section {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--gutter) 0;
+}
+
+.section__header {
+  max-width: 42rem;
+  margin-bottom: var(--space-m);
+}
+
+.section__title {
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-h2);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.section__intro {
+  color: var(--color-muted);
+}
+
+/* ---------- 7. Toolbar + filters ---------- */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  margin-bottom: var(--space-m);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.filter {
+  min-height: var(--touch);
+  padding: 0 1.1rem;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter:hover {
+  border-color: var(--color-muted);
+}
+
+.filter.is-active {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
+}
+
+.toolbar__count {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+/* ---------- 8. Plant cards ---------- */
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-m);
+}
+
+.plant-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-top: 5px solid var(--color-leaf);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.plant-card.is-due {
+  border-top-color: var(--color-due);
+}
+
+.plant-card.is-overdue {
+  border-top-color: var(--color-overdue);
+}
+
+.plant-card.is-done {
+  border-top-color: var(--color-water);
+}
+
+.plant-card__name {
+  font-size: var(--text-h3);
+}
+
+.plant-card__type {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.plant-card__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--color-leaf);
+}
+
+.plant-card__status::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.plant-card.is-due .plant-card__status {
+  color: var(--color-due);
+}
+
+.plant-card.is-overdue .plant-card__status {
+  color: var(--color-overdue);
+}
+
+.plant-card.is-done .plant-card__status {
+  color: var(--color-water);
+}
+
+.moisture__label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.moisture__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.moisture__track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: var(--color-surface-alt);
+  overflow: hidden;
+}
+
+.moisture__fill {
+  display: block;
+  width: var(--level, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-water);
+  transition: width 0.4s ease;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips__item {
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  background-color: var(--color-surface-alt);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.chips__item--safe {
+  background-color: var(--color-leaf);
+  color: var(--color-on-leaf);
+}
+
+.plant-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+}
+
+.plant-card__actions .button--water {
+  flex: 1;
+}
+
+.empty {
+  padding: var(--space-m);
+  border: 2px dashed var(--color-line);
+  border-radius: var(--radius);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ---------- 9. Add form ---------- */
+.add {
+  display: grid;
+  gap: var(--space-m);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form__field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: var(--touch);
+}
+
+.form__label {
+  font-weight: 650;
+}
+
+.form__optional {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.form__input {
+  width: 100%;
+  min-height: var(--touch);
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-muted);
+  border-radius: var(--radius-small);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.form__input.is-invalid {
+  border-color: var(--color-overdue);
+}
+
+.form__check {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0;
+  accent-color: var(--color-leaf);
+}
+
+.form__error {
+  min-height: 0;
+  color: var(--color-overdue);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.form__error:empty {
+  display: none;
+}
+
+.form__submit {
+  justify-self: start;
+}
+
+/* ---------- 10. Accordion ---------- */
+.accordion {
+  max-width: 48rem;
+  margin-top: var(--space-m);
+  border-top: 1px solid var(--color-line);
+}
+
+.accordion__item {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.accordion__heading {
+  font-size: 1.1rem;
+}
+
+.accordion__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.6rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Plus sign that turns into a minus when open */
+.accordion__trigger::after {
+  content: "";
+  flex: 0 0 1rem;
+  height: 1rem;
+  background:
+    linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 2px 100% no-repeat;
+  transition: transform 0.25s ease;
+}
+
+.accordion__item.is-open .accordion__trigger::after {
+  transform: rotate(90deg);
+  background: linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat;
+}
+
+.accordion__panel {
+  padding-bottom: var(--space-s);
+  max-width: 40rem;
+  color: var(--color-muted);
+}
+
+/* ---------- 11. Footer ---------- */
+.site-footer {
+  margin-top: var(--space-xl);
+  border-top: 1px solid var(--color-line);
+  background-color: var(--color-surface-alt);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-s);
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-l) var(--gutter);
+}
+
+.site-footer__legal {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   30em (480px): large phones — show the "Dark mode" text again
+   ========================================================================== */
+@media (min-width: 30em) {
+  .theme-toggle__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+}
+
+/* ==========================================================================
+   48em (768px): tablet
+   ========================================================================== */
+@media (min-width: 48em) {
+  .menu-button {
+    display: none;
+  }
+
+  .site-header__inner {
+    flex-wrap: nowrap;
+  }
+
+  .site-header__controls {
+    order: 3;
+  }
+
+  .site-nav,
+  .site-nav.is-open {
+    display: block;
+    flex-basis: auto;
+    margin-left: auto;
+  }
+
+  .site-nav__list {
+    flex-direction: row;
+    gap: var(--space-s);
+    padding: 0;
+  }
+
+  .site-nav__link {
+    min-height: var(--touch);
+    border-top: 0;
+    border-bottom: 3px solid transparent;
+  }
+
+  .site-nav__link:hover {
+    border-bottom-color: var(--color-sun);
+    color: var(--color-ink);
+  }
+
+  .toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form__field--check,
+  .form__submit {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ==========================================================================
+   64em (1024px): desktop
+   ========================================================================== */
+@media (min-width: 64em) {
+  .hero {
+    grid-template-columns: minmax(0, 1.3fr) minmax(20rem, 1fr);
+    align-items: center;
+    padding-top: var(--space-xl);
+  }
+
+  .add {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
